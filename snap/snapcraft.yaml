@@ -1,0 +1,36 @@
+name: updatehostsfile
+base: core18
+version: 'git'
+summary: Consolidates several reputable hosts files into a unified hosts file
+description: >
+  Extending and consolidating hosts files from several well-curated sources
+  like adaway.org, mvps.org, malwaredomainlist.com, someonewhocares.org, and
+  potentially others. You can optionally invoke extensions to block additional
+  sites by category.
+
+grade: stable
+confinement: strict
+
+parts:
+  updatehostsfile:
+    plugin: python
+    source: .
+    requirements:
+      - requirements.txt
+    override-build: |
+      snapcraftctl build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      cp -a updateHostsFile.py $SNAPCRAFT_PART_INSTALL/bin
+      chmod +x $SNAPCRAFT_PART_INSTALL/bin/updateHostsFile.py
+
+      for DIR in alternates data extensions; do
+        mkdir -p $SNAPCRAFT_PART_INSTALL/hosts/$DIR
+        cp -a $DIR/* $SNAPCRAFT_PART_INSTALL/hosts/$DIR/
+      done
+
+apps:
+  updatehostsfile:
+    command: bin/updateHostsFile.py
+    plugs:
+      - home
+      - network
